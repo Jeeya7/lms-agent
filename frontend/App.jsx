@@ -3,7 +3,8 @@ import { useState } from "react";
 // Components
 import Header from "./components/Header";
 import StepIndicator from "./components/StepIndicator";
-import FileUploadCard from "./components/FileUploadCard";
+import CanvasIcsInput from "./components/CanvasIcsInput";
+import OutlookIcsListInput from "./components/OutlookIcsListInput";
 import PreferencesForm from "./components/PreferencesForm";
 import LoadingState from "./components/LoadingState";
 import SummaryCards from "./components/SummaryCards";
@@ -31,8 +32,9 @@ import { generateICS } from "./utils/generateICS";
 
 export default function App() {
   const [step, setStep] = useState(1);
-  const [canvasFile, setCanvasFile] = useState(null);
-  const [outlookFile, setOutlookFile] = useState(null);
+  const [canvasIcsLink, setCanvasIcsLink] = useState("");
+  const [outlookIcsLinks, setOutlookIcsLinks] = useState([""]);
+  const [attemptedStep1Submit, setAttemptedStep1Submit] = useState(false);
   const [prefs, setPrefs] = useState({
     confidence: "medium",
     latestTime: "22:00",
@@ -50,7 +52,65 @@ export default function App() {
 
   // ── Handlers ────────────────────────────────────────────────────────────────
 
+  function validateIcsUrl(value) {
+    const trimmed = value.trim();
+    if (!trimmed) {
+      return "This field is required.";
+    }
+
+    try {
+      const parsed = new URL(trimmed);
+      const isHttp = parsed.protocol === "http:" || parsed.protocol === "https:";
+      const hasIcsExtension = parsed.pathname.toLowerCase().endsWith(".ics");
+
+      if (!isHttp || !hasIcsExtension) {
+        return "Enter a valid http(s) URL ending in .ics.";
+      }
+
+      return "";
+    } catch {
+      return "Enter a valid http(s) URL ending in .ics.";
+    }
+  }
+
+  function buildSubmissionPayload() {
+    return {
+      canvas_ics: canvasIcsLink.trim(),
+      outlook_ics: outlookIcsLinks.map((link) => link.trim()),
+    };
+  }
+
+  function getFieldError(value) {
+    if (!value.trim()) {
+      return attemptedStep1Submit ? "This field is required." : "";
+    }
+    return validateIcsUrl(value);
+  }
+
+  function updateOutlookLink(index, value) {
+    setOutlookIcsLinks((prev) => prev.map((item, i) => (i === index ? value : item)));
+  }
+
+  function addOutlookLink() {
+    setOutlookIcsLinks((prev) => [...prev, ""]);
+  }
+
+  function removeOutlookLink(index) {
+    setOutlookIcsLinks((prev) => prev.filter((_, i) => i !== index));
+  }
+
+  function handleStep1Continue() {
+    setAttemptedStep1Submit(true);
+    if (!isStep1Valid) {
+      return;
+    }
+    setStep(2);
+  }
+
   function handleGenerate() {
+    const payload = buildSubmissionPayload();
+    // Replace this with your API request and pass `payload` as the request body.
+    console.log("Study plan payload", payload);
     setLoading(true);
     setStep(4);
     // Replace this timeout with your real API call.
@@ -77,9 +137,17 @@ export default function App() {
   }
 
   function loadDemoFiles() {
-    setCanvasFile({ name: "canvas_export.ics" });
-    setOutlookFile({ name: "outlook_export.ics" });
+    setCanvasIcsLink("https://example.edu/canvas_export.ics");
+    setOutlookIcsLinks([
+      "https://outlook.office.com/calendar_primary.ics",
+      "https://outlook.office.com/calendar_club.ics",
+    ]);
   }
+
+  const canvasIcsError = getFieldError(canvasIcsLink);
+  const outlookIcsErrors = outlookIcsLinks.map(getFieldError);
+  const isStep1Valid =
+    !canvasIcsError && outlookIcsErrors.every((error) => !error);
 
   // ── Render ──────────────────────────────────────────────────────────────────
 
@@ -90,45 +158,33 @@ export default function App() {
       <main className="mx-auto w-full max-w-7xl px-6 py-8 lg:px-10 lg:py-10">
         <StepIndicator currentStep={step} />
 
-        {/* ── STEP 1: File Upload ─────────────────────────────────────────── */}
+        {/* ── STEP 1: ICS Link Input ──────────────────────────────────────── */}
         {step === 1 && (
           <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm md:p-8">
             <div className="mb-6">
               <h1 className="m-0 text-2xl font-bold tracking-tight text-slate-900 md:text-3xl">
-                Upload your calendars
+                Connect your calendar links
               </h1>
               <p className="mt-2 text-sm text-slate-600 md:text-base">
-                Connect your Canvas course schedule and Outlook availability to
+                Paste one Canvas ICS link and one or more Outlook ICS links to
                 get started.
               </p>
             </div>
 
-            <div className="mb-8 grid gap-5 md:grid-cols-2">
-              <div>
-                <div className="mb-2 text-sm font-semibold text-slate-700">
-                  Canvas Calendar <span className="text-rose-500">*</span>
-                </div>
-                <FileUploadCard
-                  label="Upload Canvas .ics"
-                  sublabel="Export from Canvas → Calendar → Export"
-                  icon="📚"
-                  file={canvasFile}
-                  onFile={setCanvasFile}
-                />
-              </div>
+            <div className="mb-8 space-y-6">
+              <CanvasIcsInput
+                value={canvasIcsLink}
+                onChange={setCanvasIcsLink}
+                error={canvasIcsError}
+              />
 
-              <div>
-                <div className="mb-2 text-sm font-semibold text-slate-700">
-                  Outlook Calendar <span className="text-rose-500">*</span>
-                </div>
-                <FileUploadCard
-                  label="Upload Outlook .ics"
-                  sublabel="Export from Outlook → File → Save as"
-                  icon="📅"
-                  file={outlookFile}
-                  onFile={setOutlookFile}
-                />
-              </div>
+              <OutlookIcsListInput
+                links={outlookIcsLinks}
+                errors={outlookIcsErrors}
+                onChangeLink={updateOutlookLink}
+                onAddLink={addOutlookLink}
+                onRemoveLink={removeOutlookLink}
+              />
             </div>
 
             <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
@@ -143,8 +199,8 @@ export default function App() {
               </p>
 
               <button
-                onClick={() => setStep(2)}
-                disabled={!canvasFile || !outlookFile}
+                onClick={handleStep1Continue}
+                disabled={!isStep1Valid}
                 className="inline-flex h-11 min-w-36 items-center justify-center rounded-xl bg-indigo-700 px-6 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-800 disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-400"
               >
                 Continue →
@@ -205,7 +261,10 @@ export default function App() {
               </div>
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 {[
-                  { label: "Calendars", value: "Canvas + Outlook" },
+                  {
+                    label: "Calendars",
+                    value: `Canvas + ${outlookIcsLinks.length} Outlook`,
+                  },
                   {
                     label: "Confidence",
                     value:
@@ -295,8 +354,8 @@ export default function App() {
                   key={id}
                   onClick={() => setActiveTab(id)}
                   className={`flex-1 rounded-lg px-3 py-2 text-sm font-semibold transition ${activeTab === id
-                      ? "bg-white text-slate-900 shadow-sm"
-                      : "text-slate-500 hover:text-slate-700"
+                    ? "bg-white text-slate-900 shadow-sm"
+                    : "text-slate-500 hover:text-slate-700"
                     }`}
                 >
                   {label}
