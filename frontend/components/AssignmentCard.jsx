@@ -1,4 +1,3 @@
-import React from "react";
 import { DIFFICULTY_CONFIG, getPriorityColor } from "../utils/difficultyStyles";
 import { formatDate } from "../utils/formatDate";
 
