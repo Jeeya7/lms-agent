@@ -28,6 +28,7 @@ backend/.venv/
 # Azure Functions local settings
 local.settings.json
 backend/local.settings.json
+local.settings.*.json
 
 # Frontend / Node / Vite
 node_modules/
