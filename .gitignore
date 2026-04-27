@@ -1,12 +1,51 @@
+# Environment and secrets
 .env
-.venv
+.env.*
+!.env.example
+!.env.sample
 
-local.settings.json
-local.settings.example.json
-
+# Python
 __pycache__/
 *.py[cod]
 *.pyo
 *.pyd
+*.pyc
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+
+# Virtual environments
 .venv/
 venv/
+env/
+ENV/
+backend/.venv/
+
+# Azure Functions local settings
+local.settings.json
+backend/local.settings.json
+
+# Frontend / Node / Vite
+node_modules/
+frontend/node_modules/
+dist/
+frontend/dist/
+.vite/
+coverage/
+
+# IDE and editor files
+.vscode/
+.idea/
+*.suo
+*.user
+*.userossc
+*.sln.docstates
+
+# OS / shell noise
+.DS_Store
+Thumbs.db
+ModuleAnalysisCache/
