@@ -7,8 +7,9 @@ import React from "react";
  * Props:
  *   hasResult  {boolean}  – whether to show the header export button
  *   onDownload {function} – called when the export button is clicked
+ *   dataSource {string}   – "backend" or "mock" (optional)
  */
-export default function Header({ hasResult, onDownload }) {
+export default function Header({ hasResult, onDownload, dataSource }) {
   return (
     <header className="border-b border-slate-200 bg-white/90 backdrop-blur">
       <div className="mx-auto flex w-full max-w-7xl flex-wrap items-center justify-between gap-3 px-6 py-4 lg:px-10">
@@ -23,6 +24,16 @@ export default function Header({ hasResult, onDownload }) {
               <span className="rounded-full bg-indigo-100 px-2.5 py-1 text-xs font-semibold text-indigo-700">
                 AI-Powered
               </span>
+              {dataSource && (
+                <span
+                  className={`rounded-full px-2.5 py-1 text-xs font-semibold ${dataSource === "backend"
+                      ? "bg-green-100 text-green-700"
+                      : "bg-amber-100 text-amber-700"
+                    }`}
+                >
+                  {dataSource === "backend" ? "✓ Live Data" : "⚠ Demo Data"}
+                </span>
+              )}
             </div>
             <p className="mt-1 text-sm text-slate-500">
               Plan smarter with deadline-aware study scheduling.

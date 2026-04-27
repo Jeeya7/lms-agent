@@ -12,9 +12,8 @@ import AssignmentList from "./components/AssignmentList";
 import ScheduleView from "./components/ScheduleView";
 import ExportButton from "./components/ExportButton";
 
-// Data
-import { MOCK_ASSIGNMENTS, MOCK_SUMMARY } from "./data/mockAssignments";
-import { MOCK_SCHEDULE } from "./data/mockSchedule";
+// Services
+import { generateStudyPlan } from "./services/studyPlanService";
 
 // Utils
 import { generateICS } from "./utils/generateICS";
@@ -43,6 +42,7 @@ export default function App() {
   });
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
+  const [dataSource, setDataSource] = useState(null); // "backend" or "mock"
   const [activeTab, setActiveTab] = useState("assignments");
 
   // Derived state used in results view
@@ -73,13 +73,6 @@ export default function App() {
     }
   }
 
-  function buildSubmissionPayload() {
-    return {
-      canvas_ics: canvasIcsLink.trim(),
-      outlook_ics: outlookIcsLinks.map((link) => link.trim()),
-    };
-  }
-
   function getFieldError(value) {
     if (!value.trim()) {
       return attemptedStep1Submit ? "This field is required." : "";
@@ -107,22 +100,40 @@ export default function App() {
     setStep(2);
   }
 
-  function handleGenerate() {
-    const payload = buildSubmissionPayload();
-    // Replace this with your API request and pass `payload` as the request body.
-    console.log("Study plan payload", payload);
+  async function handleGenerate() {
+    const payload = {
+      canvas_ics: canvasIcsLink.trim(),
+      outlook_ics: outlookIcsLinks.map((link) => link.trim()),
+    };
+
+    console.log("Study plan request", payload);
     setLoading(true);
     setStep(4);
-    // Replace this timeout with your real API call.
-    // Shape the response to match: { summary, assignments, schedule }
-    setTimeout(() => {
-      setResult({
-        summary: MOCK_SUMMARY,
-        assignments: MOCK_ASSIGNMENTS,
-        schedule: MOCK_SCHEDULE,
-      });
+
+    try {
+      const { data, source } = await generateStudyPlan(
+        payload.canvas_ics,
+        payload.outlook_ics,
+        prefs.selectedCourse || null,
+        prefs.confidence || null
+      );
+
+      setResult(data);
+      setDataSource(source);
+
+      // Log data source for transparency
+      if (source === "backend") {
+        console.info("✓ Study plan generated from live backend");
+      } else {
+        console.warn("⚠ Study plan generated from mock data (backend unavailable)");
+      }
+    } catch (error) {
+      console.error("Error generating study plan:", error);
+      // Even with error, we should have fallback data from the service
+      setDataSource("mock");
+    } finally {
       setLoading(false);
-    }, 3200);
+    }
   }
 
   function handleDownload() {
@@ -153,7 +164,7 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900">
-      <Header hasResult={!!result} onDownload={handleDownload} />
+      <Header hasResult={!!result} onDownload={handleDownload} dataSource={dataSource} />
 
       <main className="mx-auto w-full max-w-7xl px-6 py-8 lg:px-10 lg:py-10">
         <StepIndicator currentStep={step} />
