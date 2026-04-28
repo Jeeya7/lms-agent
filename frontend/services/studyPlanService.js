@@ -10,7 +10,24 @@ import { MOCK_SUMMARY, MOCK_ASSIGNMENTS } from "../data/mockAssignments";
 import { MOCK_SCHEDULE } from "../data/mockSchedule";
 
 // Configuration
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:7071";
+function normalizeApiBase(rawValue) {
+  const cleaned = (rawValue || "").trim();
+  if (!cleaned) {
+    return "";
+  }
+
+  const withProtocol = /^https?:\/\//i.test(cleaned)
+    ? cleaned
+    : `https://${cleaned}`;
+
+  return withProtocol.replace(/\/+$/, "");
+}
+
+const API_BASE_URL = normalizeApiBase(
+  import.meta.env.VITE_API_BASE_URL ||
+  import.meta.env.VITE_LMS_FUNCTION_APP_BASE ||
+  ""
+);
 const API_TIMEOUT = 10000; // 10 seconds
 
 /**
@@ -52,7 +69,8 @@ export async function generateStudyPlan(
   canvasIcsUrl,
   outlookIcsUrls,
   selectedCourse,
-  confidenceLevel
+  confidenceLevel,
+  preferences = null
 ) {
   try {
     // Attempt to call backend API
@@ -68,6 +86,7 @@ export async function generateStudyPlan(
           outlook_ics_urls: outlookIcsUrls,
           selected_course: selectedCourse || null,
           confidence_level: confidenceLevel || null,
+          preferences: preferences,
         }),
       }
     );

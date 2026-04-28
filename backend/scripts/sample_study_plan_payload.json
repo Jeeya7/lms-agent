@@ -1,0 +1,52 @@
+{
+  "selected_course": null,
+  "preferences": {
+    "confidence": "medium",
+    "latestTime": "21:30",
+    "daysEarly": 2,
+    "maxHours": 4
+  },
+  "canvas_assignments": [
+    {
+      "course": "CS 3740: Security",
+      "title": "Wireshark Lab",
+      "due_at": "2026-04-30T23:59:00+00:00",
+      "description": "Capture packets, annotate screenshots, and explain the protocol flow.",
+      "source": "canvas",
+      "uid": "assignment-1"
+    },
+    {
+      "course": "MATH 2210: Linear Algebra",
+      "title": "Homework 9",
+      "due_at": "2026-05-01T23:59:00+00:00",
+      "description": "Proof-based questions on eigenvalues and eigenspaces.",
+      "source": "canvas",
+      "uid": "assignment-2"
+    },
+    {
+      "course": "Unknown Course",
+      "title": "Notification: buy graduation tickets",
+      "due_at": "2026-04-29T16:00:00+00:00",
+      "description": "A general reminder that is not coursework and should be ignored.",
+      "source": "canvas",
+      "uid": "notification-1"
+    }
+  ],
+  "outlook_busy_blocks": [
+    {
+      "title": "Operating Systems Lecture",
+      "start": "2026-04-27T17:00:00+00:00",
+      "end": "2026-04-27T18:15:00+00:00"
+    },
+    {
+      "title": "Club Meeting",
+      "start": "2026-04-28T20:00:00+00:00",
+      "end": "2026-04-28T21:00:00+00:00"
+    },
+    {
+      "title": "Work Shift",
+      "start": "2026-04-29T22:00:00+00:00",
+      "end": "2026-04-30T02:00:00+00:00"
+    }
+  ]
+}

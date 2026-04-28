@@ -115,7 +115,8 @@ export default function App() {
         payload.canvas_ics,
         payload.outlook_ics,
         prefs.selectedCourse || null,
-        prefs.confidence || null
+        prefs.confidence || null,
+        prefs
       );
 
       setResult(data);

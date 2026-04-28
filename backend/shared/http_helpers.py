@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import traceback
 
 import azure.functions as func
 
@@ -21,6 +22,8 @@ def read_json(req: func.HttpRequest) -> dict:
 
 
 def error_response(exc: Exception) -> func.HttpResponse:
+    print("[backend error]", repr(exc))
+    print(traceback.format_exc())
     if isinstance(exc, ValueError):
         return json_response({"error": str(exc)}, 400)
     return json_response({"error": f"Unexpected parser failure: {exc}"}, 502)

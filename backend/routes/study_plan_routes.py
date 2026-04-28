@@ -14,6 +14,7 @@ def register_study_plan_routes(app: func.FunctionApp) -> None:
         canvas_ics_url = require_string(body, "canvas_ics_url")
         selected_course = body.get("selected_course")
         confidence_level = body.get("confidence_level")
+        preferences = body.get("preferences")
 
         try:
             outlook_ics_urls = require_string_list(body, "outlook_ics_urls")
@@ -22,6 +23,7 @@ def register_study_plan_routes(app: func.FunctionApp) -> None:
                 outlook_ics_urls=outlook_ics_urls,
                 selected_course=str(selected_course) if selected_course else None,
                 confidence_level=str(confidence_level) if confidence_level else None,
+                preferences=preferences if isinstance(preferences, dict) else None,
             )
         except Exception as exc:  # noqa: BLE001
             return error_response(exc)
